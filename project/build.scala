@@ -38,12 +38,12 @@ object MyLordBuild extends Build {
   object Dependencies {
 
     object Version {
-      val http4s = "0.8.2"
+      val http4s = "0.8.3"
       val nscalaTime = "2.0.0"
       val doobie = "0.2.2"
       val config = "1.3.0"
       val logbackClassic = "1.1.2"
-      val scalaprops = "0.1.9"
+      val scalaprops = "0.1.10"
     }
 
     val http4sCore  = "org.http4s" %% "http4s-core"    % Version.http4s

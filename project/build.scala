@@ -38,7 +38,7 @@ object MyLordBuild extends Build {
   object Dependencies {
 
     object Version {
-      val http4s = "0.8.3"
+      val http4s = "0.8.4"
       val nscalaTime = "2.0.0"
       val doobie = "0.2.2"
       val config = "1.3.0"

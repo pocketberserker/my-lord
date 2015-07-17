@@ -1,4 +1,5 @@
-package mylord.novel
+package mylord
+package novel
 
 abstract class Novel(title: String)
 

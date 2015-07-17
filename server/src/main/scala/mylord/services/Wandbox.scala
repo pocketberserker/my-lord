@@ -7,13 +7,49 @@ import json.Codec._
 
 object Wandbox {
 
-  val name = "wandbox"
-
   final case class SwitchOption(name: String, displayFlags: String, displayName: String)
 
   sealed abstract class Switch
   final case class SingleSwitch(default: Boolean, option: SwitchOption) extends Switch
   case class MultipleSwitch(default: String, options: List[SwitchOption]) extends Switch
+
+  implicit val SwitchOptionCodecJson: CodecJson[SwitchOption] =
+    CodecJson((o: SwitchOption) =>
+      ("name" := o.name) ->:
+      ("display-flags" := o.displayFlags) ->:
+      ("display-name" := o.displayName) ->:
+      jEmptyObject,
+      o => for {
+        name <- (o --\ "name").as[String]
+        displayFlags <- (o --\ "display-flags").as[String]
+        displayName <- (o --\ "display-name").as[String]
+      } yield SwitchOption(name, displayFlags, displayName))
+
+  val SingleSwitchCodecJson: CodecJson[SingleSwitch] =
+    CodecJson((s: SingleSwitch) =>
+      ("default" := s.default) ->:
+      ("name" := s.option.name) ->:
+      ("display-flags" := s.option.displayFlags) ->:
+      ("display-name" := s.option.displayName) ->:
+      jEmptyObject,
+      s => for {
+        default <- (s --\ "default").as[Boolean]
+        name <- (s --\ "name").as[String]
+        displayFlags <- (s --\ "display-flags").as[String]
+        displayName <- (s --\ "display-name").as[String]
+      } yield SingleSwitch(default, SwitchOption(name, displayFlags, displayName)))
+
+  val MultipleSwitchCodecJson: CodecJson[MultipleSwitch] =
+    casecodec2(MultipleSwitch.apply _, MultipleSwitch.unapply _)("default", "options")
+
+  implicit val SwitchEncodeJson: EncodeJson[Switch] =
+    EncodeJson(_ match {
+      case s@SingleSwitch(_, _) => SingleSwitchCodecJson.encode(s)
+      case m@MultipleSwitch(_, _) => MultipleSwitchCodecJson.encode(m)
+    })
+
+  implicit val SwitchDecodeJson: DecodeJson[Switch] =
+    SingleSwitchCodecJson.map(_.asInstanceOf[Switch]) ||| (MultipleSwitchCodecJson.map(_.asInstanceOf[Switch]))
 
   final case class Compiler(
     name: String,
@@ -25,30 +61,27 @@ object Wandbox {
     displayCompileCommand: String,
     switches: List[Switch])
 
-  implicit val SwitchOptionDecodeJson: DecodeJson[SwitchOption] =
-    jdecode3L(SwitchOption.apply)("name", "display-flags", "display-name")
-
-  implicit val SwitchDecodeJson: DecodeJson[Switch] =
-    DecodeJson(c => (for {
-      default <- (c --\ "default").as[Boolean]
-      name <- (c --\ "name").as[String]
-      displayFlags <- (c --\ "display-flags").as[String]
-      displayName <- (c --\ "display-name").as[String]
-    } yield SingleSwitch(default, SwitchOption(name, displayFlags, displayName)))
-    ||| (for {
-      default <- (c --\ "default").as[String]
-      options <- (c --\ "options").as[List[SwitchOption]]
-    } yield MultipleSwitch(default, options)))
-
-  implicit val CompilerDecodeJson: DecodeJson[Compiler] =
-    jdecode8L(Compiler.apply)("name",
-      "version",
-      "language",
-      "display-name",
-      "compiler-option-raw",
-      "runtime-option-raw",
-      "display-compile-command",
-      "switches")
+  implicit val CompilerCodecJson: CodecJson[Compiler] =
+    CodecJson((c: Compiler) =>
+      ("name" := c.name) ->:
+      ("version" := c.version) ->:
+      ("language" := c.language) ->:
+      ("display-name" := c.displayName) ->:
+      ("compiler-option-raw" := c.compilerOptionRaw) ->:
+      ("runtime-option-raw" := c.runtimeOptionRaw) ->:
+      ("display-compile-command" := c.displayCompileCommand) ->:
+      ("switches" := c.switches) ->:
+      jEmptyObject,
+      c => for {
+        name <- (c --\ "name").as[String]
+        version <- (c --\ "version").as[String]
+        language <- (c --\ "language").as[String]
+        displayName <- (c --\ "display-name").as[String]
+        compilerOptionRaw <- (c --\ "compiler-option-raw").as[Boolean]
+        runtimeOptionRaw <- (c --\ "runtime-option-raw").as[Boolean]
+        displayCompilerCommand <- (c --\ "display-compile-command").as[String]
+        switches <- (c --\ "switches").as[List[Switch]]
+      } yield Compiler(name, version, language, displayName, compilerOptionRaw, runtimeOptionRaw, displayCompilerCommand, switches))
 
   final case class Compile(
     compiler: String,

@@ -10,8 +10,8 @@ import JsonChecker._
 
 class WandboxTest extends FlatSpec {
 
-  "compiler json" should "decode object" in {
-    val input = """{
+  "compilers json" should "decode object" in {
+    val input = """[{
   "compiler-option-raw":true,
   "runtime-option-raw":false,
   "display-compile-command":"g++ prog.cc",
@@ -32,10 +32,9 @@ class WandboxTest extends FlatSpec {
   "version":"4.9.0 20131031 (experimental)",
   "language":"C++",
   "display-name":"gcc HEAD"
-}
-"""
+}]"""
 
-    val expected = Compiler(
+    val expected = List(Compiler(
       "gcc-head",
       "4.9.0 20131031 (experimental)",
       "C++",
@@ -45,9 +44,9 @@ class WandboxTest extends FlatSpec {
       "g++ prog.cc",
       List(
         SingleSwitch(true, SwitchOption("warning", "-Wall", "Warnings")),
-        MultipleSwitch("boost-nothing", List(SwitchOption("boost-nothing", "", "Don't Use Boost")))))
+        MultipleSwitch("boost-nothing", List(SwitchOption("boost-nothing", "", "Don't Use Boost"))))))
 
-    assert(Parse.decodeOption[Compiler](input) === Some(expected))
+    assert(Parse.decodeOption[List[Compiler]](input) === Some(expected))
   }
 }
 

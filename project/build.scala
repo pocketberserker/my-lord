@@ -19,6 +19,7 @@ object MyLordBuild extends Build {
       http4sCore,
       http4sDSL,
       http4sBlaze,
+      http4sBlazeClient,
       http4sArgonaut,
       nscalaTime,
       doobiePostgresql,
@@ -49,6 +50,7 @@ object MyLordBuild extends Build {
     val http4sCore  = "org.http4s" %% "http4s-core"    % Version.http4s
     val http4sDSL   = "org.http4s" %% "http4s-dsl"     % Version.http4s
     val http4sBlaze = "org.http4s" %% "http4s-blazeserver"   % Version.http4s
+    val http4sBlazeClient = "org.http4s" %% "http4s-blazeclient"   % Version.http4s
     val http4sArgonaut = "org.http4s" %% "http4s-argonaut"   % Version.http4s
     val scalatest = "org.scalatest" %% "scalatest" % "2.2.4"
     val nscalaTime = "com.github.nscala-time" %% "nscala-time" % Version.nscalaTime

@@ -83,6 +83,11 @@ object Wandbox {
         switches <- (c --\ "switches").as[List[Switch]]
       } yield Compiler(name, version, language, displayName, compilerOptionRaw, runtimeOptionRaw, displayCompilerCommand, switches))
 
+  // https://github.com/argonaut-io/argonaut/commit/31c1becfa29f6f7
+  // この修正を含むhttp4s-argonautがリリースされるまで使えない
+  //implicit CompilersCodesJson: CodecJson[List[Compiler]] =
+  //  CodecJson.derived[List[Compiler]]
+
   final case class Compile(
     compiler: String,
     code: String,

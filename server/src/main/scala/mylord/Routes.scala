@@ -31,7 +31,7 @@ class Routes {
       (for {
         u <- compileUri
         c <- req.attemptAs[Compile](jsonOf[Compile]).leftMap(_.toString)
-        res <- new WandboxClient().compile(u, c)
+        res <- new WandboxClient().compile(u, c.copy(save = Some(true)))
       } yield res)
         .run
         .flatMap(_.fold(e => InternalServerError(e), res => Ok(res)(jsonEncoderOf[CompileResult])))

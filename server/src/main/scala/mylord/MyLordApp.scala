@@ -3,7 +3,7 @@ package mylord
 import com.typesafe.config.ConfigFactory
 import org.http4s.server.blaze.BlazeBuilder
 
-object SideburnsApp {
+object MyLordApp {
 
   def main(args: Array[String]): Unit = {
     val routes = new Routes().service

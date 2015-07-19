@@ -4,10 +4,11 @@ import com.typesafe.config.ConfigFactory
 import argonaut._, Argonaut._
 import scalaz._
 import scalaz.concurrent.Task
+import scalaz.concurrent.Task._
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.server.HttpService
-import org.http4s.argonaut.jsonEncoderOf
+import org.http4s.argonaut._
 import services._
 
 class Routes {
@@ -16,20 +17,24 @@ class Routes {
 
   private val config = ConfigFactory.load()
   private val baseUrl = config.getString("wandbox.url")
-  private def url(path: String) = Uri.fromString(s"$baseUrl$path")
+  private def url(path: String): Action[Uri] =
+    EitherT(Task.now(Uri.fromString(s"$baseUrl$path"))).leftMap(_.toString)
   private val listUri = url("list.json")
+  private val compileUri = url("compile.json")
 
   def service = HttpService {
-    case req @ GET -> Root / "list.json" =>
-      Task.now(listUri).flatMap {
-        case \/-(x) => new WandboxClient().list(x).flatMap {
-          case \/-(res) => Ok(res)(jsonEncoderOf[List[Compiler]])
-          // TODO: statusを適切なものに変更する
-          case -\/(s) => InternalServerError(s.toString)
-        }
-        case -\/(e) => InternalServerError(e.toString)
-      }
-
+    case GET -> Root / "list.json" =>
+      listUri.flatMap(new WandboxClient().list(_))
+        .run
+        .flatMap(_.fold(e => InternalServerError(e), res => Ok(res)(jsonEncoderOf[List[Compiler]])))
+    case req @ POST -> Root / "compile.json" =>
+      (for {
+        u <- compileUri
+        c <- req.attemptAs[Compile](jsonOf[Compile]).leftMap(_.toString)
+        res <- new WandboxClient().compile(u, c)
+      } yield res)
+        .run
+        .flatMap(_.fold(e => InternalServerError(e), res => Ok(res)(jsonEncoderOf[CompileResult])))
     case _ -> Root =>
       MethodNotAllowed()
   }

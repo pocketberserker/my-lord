@@ -150,8 +150,8 @@ object Wandbox {
 
   final case class PermanentLink(compile: Compile, result: CompileResult)
 
-  implicit val PermanentLinkDecodeJson: DecodeJson[PermanentLink] =
-    jdecode2L(PermanentLink.apply)("parameter", "result")
+  implicit val PermanentLinkCodecJson: CodecJson[PermanentLink] =
+    casecodec2(PermanentLink.apply, PermanentLink.unapply)("parameter", "result")
 
   object Url extends WandboxUrl
 }

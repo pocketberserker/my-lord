@@ -34,5 +34,10 @@ class WandboxClient() {
     val req = POST(uri, data)
     response[CompileResult](client(req))
   }
+
+  def permlink(uri: Uri): Action[PermanentLink] = {
+    implicit val permLinkDecoder = jsonOf[PermanentLink]
+    response[PermanentLink](client(uri))
+  }
 }
 

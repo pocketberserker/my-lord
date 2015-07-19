@@ -54,7 +54,7 @@ object WandbodCheck extends Scalaprops {
 
   implicit val genString = Gen.alphaLowerString
 
-  implicit val arbCompile: Gen[Compile] = for {
+  implicit val genCompile: Gen[Compile] = for {
       compiler <- Gen[String]
       code <- Gen[String]
       codes <- Gen[Option[List[String]]]
@@ -69,7 +69,7 @@ object WandbodCheck extends Scalaprops {
 
   val encodeAndDecodeCompile = JsonChecker.law[Compile]
 
-  implicit val arbCompileResult: Gen[CompileResult] = Gen(for {
+  implicit val genCompileResult: Gen[CompileResult] = Gen(for {
       status <- Gen[Int]
       signal <- Gen[Option[String]]
       compilerOutput <- Gen[Option[String]]
@@ -95,4 +95,13 @@ object WandbodCheck extends Scalaprops {
   implicit val equalCompileResult: Equal[CompileResult] = Equal.equalA
 
   val encodeAndDecodeCompileResult = JsonChecker.law[CompileResult]
+
+  implicit val genPermanentLink: Gen[PermanentLink] = Gen(for {
+    compile <- Gen[Compile]
+    result <- Gen[CompileResult]
+  } yield PermanentLink(compile, result))
+
+  implicit val equalPermanentLink: Equal[PermanentLink] = Equal.equalA
+
+  val encodeAndDecodePermanentLink = JsonChecker.law[PermanentLink]
 }

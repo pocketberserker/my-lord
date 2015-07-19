@@ -19,14 +19,16 @@ class WandboxTest extends FlatSpec {
     "default":true,
     "name":"warning",
     "display-flags":"-Wall",
-    "display-name":"Warnings"
+    "display-name":"Warnings",
+    "type": "single"
   },{
     "default":"boost-nothing",
     "options":[{
       "name":"boost-nothing",
       "display-flags":"",
       "display-name":"Don't Use Boost"
-    }]
+    }],
+    "type": "select"
   }],
   "name":"gcc-head",
   "version":"4.9.0 20131031 (experimental)",
@@ -43,8 +45,8 @@ class WandboxTest extends FlatSpec {
       false,
       "g++ prog.cc",
       List(
-        SingleSwitch(true, SwitchOption("warning", "-Wall", "Warnings")),
-        MultipleSwitch("boost-nothing", List(SwitchOption("boost-nothing", "", "Don't Use Boost"))))))
+        SingleSwitch(true, SwitchOption("warning", "-Wall", "Warnings"), "single"),
+        SelectSwitch("boost-nothing", List(SwitchOption("boost-nothing", "", "Don't Use Boost")), "select"))))
 
     assert(Parse.decodeOption[List[Compiler]](input) === Some(expected))
   }
@@ -63,7 +65,7 @@ object WandbodCheck extends Scalaprops {
       compilerOptionRaw <- Gen[Option[String]]
       runtimeOptionRaw <- Gen[Option[String]]
       save <- Gen[Option[Boolean]]
-    } yield Compile(compiler, code, codes, options, stdin, compilerOptionRaw, runtimeOptionRaw, None, save)
+    } yield Compile(compiler, code, codes, options, stdin, compilerOptionRaw, runtimeOptionRaw, None, save, None)
 
   implicit val equalCompile: Equal[Compile] = Equal.equalA
 

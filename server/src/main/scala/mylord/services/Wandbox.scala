@@ -10,8 +10,8 @@ object Wandbox {
   final case class SwitchOption(name: String, displayFlags: String, displayName: String)
 
   sealed abstract class Switch
-  final case class SingleSwitch(default: Boolean, option: SwitchOption) extends Switch
-  case class MultipleSwitch(default: String, options: List[SwitchOption]) extends Switch
+  final case class SingleSwitch(default: Boolean, option: SwitchOption, typ: String) extends Switch
+  final case class SelectSwitch(default: String, options: List[SwitchOption], typ: String) extends Switch
 
   implicit val SwitchOptionCodecJson: CodecJson[SwitchOption] =
     CodecJson((o: SwitchOption) =>
@@ -31,25 +31,27 @@ object Wandbox {
       ("name" := s.option.name) ->:
       ("display-flags" := s.option.displayFlags) ->:
       ("display-name" := s.option.displayName) ->:
+      ("type" := s.typ) ->:
       jEmptyObject,
       s => for {
         default <- (s --\ "default").as[Boolean]
         name <- (s --\ "name").as[String]
         displayFlags <- (s --\ "display-flags").as[String]
         displayName <- (s --\ "display-name").as[String]
-      } yield SingleSwitch(default, SwitchOption(name, displayFlags, displayName)))
+        t <- (s --\ "type").as[String]
+      } yield SingleSwitch(default, SwitchOption(name, displayFlags, displayName), t))
 
-  val MultipleSwitchCodecJson: CodecJson[MultipleSwitch] =
-    casecodec2(MultipleSwitch.apply _, MultipleSwitch.unapply _)("default", "options")
+  val SelectSwitchCodecJson: CodecJson[SelectSwitch] =
+    casecodec3(SelectSwitch.apply _, SelectSwitch.unapply _)("default", "options", "type")
 
   implicit val SwitchEncodeJson: EncodeJson[Switch] =
     EncodeJson(_ match {
-      case s@SingleSwitch(_, _) => SingleSwitchCodecJson.encode(s)
-      case m@MultipleSwitch(_, _) => MultipleSwitchCodecJson.encode(m)
+      case s@SingleSwitch(_, _, _) => SingleSwitchCodecJson.encode(s)
+      case m@SelectSwitch(_, _, _) => SelectSwitchCodecJson.encode(m)
     })
 
   implicit val SwitchDecodeJson: DecodeJson[Switch] =
-    SingleSwitchCodecJson.map(_.asInstanceOf[Switch]) ||| (MultipleSwitchCodecJson.map(_.asInstanceOf[Switch]))
+    SingleSwitchCodecJson.map(_.asInstanceOf[Switch]) ||| (SelectSwitchCodecJson.map(_.asInstanceOf[Switch]))
 
   final case class Compiler(
     name: String,
@@ -97,7 +99,8 @@ object Wandbox {
     compilerOptionRaw: Option[String],
     runtimeOptionRaw: Option[String],
     createdAt: Option[DateTime],
-    save: Option[Boolean])
+    save: Option[Boolean],
+    compilerInfo: Option[Compiler])
 
   implicit val CompileCodecJson: CodecJson[Compile] =
     CodecJson((c: Compile) =>
@@ -110,6 +113,7 @@ object Wandbox {
       (c.runtimeOptionRaw.map("runtime-option-raw" := _)) ->?:
       (c.createdAt.map("created-at" := _)) ->?:
       (c.save.map("save" := _)) ->?:
+      (c.compilerInfo.map("compiler-info" := _)) ->?:
       jEmptyObject,
       c => for {
         compiler <- (c --\ "compiler").as[String]
@@ -121,7 +125,8 @@ object Wandbox {
         runtimeOptionRaw <- (c --\ "runtime-option-raw").as[Option[String]]
         createdAt <- (c --\ "created-at").as[Option[DateTime]]
         save <- (c --\ "save").as[Option[Boolean]]
-      } yield Compile(compiler, code, codes, options, stdin, compilerOptionRaw, runtimeOptionRaw, createdAt, save))
+        compilerInfo <- (c --\ "compiler-info").as[Option[Compiler]]
+      } yield Compile(compiler, code, codes, options, stdin, compilerOptionRaw, runtimeOptionRaw, createdAt, save, compilerInfo))
 
   final case class CompileResult(
     status: Int,

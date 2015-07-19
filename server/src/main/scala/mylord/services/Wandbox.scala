@@ -152,4 +152,6 @@ object Wandbox {
 
   implicit val PermanentLinkDecodeJson: DecodeJson[PermanentLink] =
     jdecode2L(PermanentLink.apply)("parameter", "result")
+
+  object Url extends WandboxUrl
 }

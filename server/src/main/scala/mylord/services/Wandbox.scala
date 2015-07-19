@@ -91,7 +91,7 @@ object Wandbox {
   final case class Compile(
     compiler: String,
     code: String,
-    codes: List[String],
+    codes: Option[List[String]],
     options: Option[String],
     stdin: Option[String],
     compilerOptionRaw: Option[String],
@@ -103,7 +103,7 @@ object Wandbox {
     CodecJson((c: Compile) =>
       ("compiler" := c.compiler) ->:
       ("code" := c.code) ->:
-      ("codes" := c.codes) ->:
+      (c.codes.map("codes" := _)) ->?:
       (c.options.map("options" := _)) ->?:
       (c.stdin.map("stdin" := _)) ->?:
       (c.compilerOptionRaw.map("compiler-option-raw" := _)) ->?:
@@ -114,7 +114,7 @@ object Wandbox {
       c => for {
         compiler <- (c --\ "compiler").as[String]
         code <- (c --\ "code").as[String]
-        codes <- (c --\ "codes").as[List[String]]
+        codes <- (c --\ "codes").as[Option[List[String]]]
         options <- (c --\ "options").as[Option[String]]
         stdin <- (c --\ "stdin").as[Option[String]]
         compilerOptionRaw <- (c --\ "compiler-option-raw").as[Option[String]]

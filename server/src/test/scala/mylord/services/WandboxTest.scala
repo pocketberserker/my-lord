@@ -57,7 +57,7 @@ object WandbodCheck extends Scalaprops {
   implicit val arbCompile: Gen[Compile] = for {
       compiler <- Gen[String]
       code <- Gen[String]
-      codes <- Gen[List[String]]
+      codes <- Gen[Option[List[String]]]
       options <- Gen[Option[String]]
       stdin <- Gen[Option[String]]
       compilerOptionRaw <- Gen[Option[String]]

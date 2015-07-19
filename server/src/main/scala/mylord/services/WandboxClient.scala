@@ -23,21 +23,24 @@ class WandboxClient() {
       case resp => Task.now(-\/(resp.status.toString))
     })
 
-  def list(uri: Uri): Action[List[Compiler]] = {
+  def list: Action[List[Compiler]] = {
     implicit val compilersDecoder = jsonOf[List[Compiler]]
-    response[List[Compiler]](client(uri))
+    Url.list.flatMap(uri => response[List[Compiler]](client(uri)))
   }
 
-  def compile(uri: Uri, data: Compile): Action[CompileResult] = {
+  def compile(c: Compile): Action[CompileResult] = {
     implicit val compileEncoder = jsonEncoderOf[Compile]
     implicit val compileResultDecoder = jsonOf[CompileResult]
-    val req = POST(uri, data)
-    response[CompileResult](client(req))
+    Url.compile.flatMap(uri => {
+      val req = POST(uri, c)
+      response[CompileResult](client(req))
+    })
   }
 
-  def permlink(uri: Uri): Action[PermanentLink] = {
+  def permlink(link: Path): Action[PermanentLink] = {
     implicit val permLinkDecoder = jsonOf[PermanentLink]
-    response[PermanentLink](client(uri))
+    Url.permlink(link.toString)
+      .flatMap(uri => response[PermanentLink](client(uri)))
   }
 }
 

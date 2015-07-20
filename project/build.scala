@@ -25,8 +25,12 @@ object MyLordBuild extends Build {
     ),
     emitSourceMaps := false,
     persistLauncher := true,
-    jsDependencies += "org.webjars" % "react" % "0.12.2" / "react-with-addons.js" commonJSName "React" minified "react-with-addons.min.js",
-
+    jsDependencies ++= Seq(
+      "org.webjars" % "react" % "0.12.2" / "react-with-addons.js" commonJSName "React" minified "react-with-addons.min.js",
+      "org.webjars" % "ace" % "01.08.2014" / "src-noconflict/ace.js",
+      "org.webjars" % "ace" % "01.08.2014" / "src-noconflict/theme-github.js" dependsOn "src-noconflict/ace.js",
+      "org.webjars" % "ace" % "01.08.2014" / "src-noconflict/mode-scala.js" dependsOn "src-noconflict/ace.js"
+    ),
     artifactPath in (Compile, fastOptJS) :=
       ((crossTarget in (Compile, fastOptJS)).value / ((moduleName in fastOptJS).value + "-opt.js"))
   )

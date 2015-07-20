@@ -6,15 +6,14 @@ import org.scalajs.dom
 import dom.document
 import japgolly.scalajs.react.{React, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
+import com.scalawarrior.scalajs.ace._
 
 object MyLordApp extends JSApp {
   @JSExport
   def main(): Unit = {
-    val hello =
-      ReactComponentB[Unit]("Hello world")
-        .render(_ => <.div("Hello world"))
-        .buildU
+    val editor = ReactAceEditor(name = "editor", theme = "github", mode = "scala")
+      .component
 
-    React.render(hello(), document.body)
+    React.render(editor, document.body)
   }
 }

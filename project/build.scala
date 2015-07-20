@@ -2,19 +2,43 @@ import sbt._
 import Keys._
 import com.typesafe.sbt.packager.archetypes._
 import scalaprops.ScalapropsPlugin.autoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.scalajs.sbtplugin.cross.CrossProject
 
 object MyLordBuild extends Build {
   import Dependencies._
 
-  lazy val buildSettings = Seq(
-    scalapropsSettings
-  ).flatten ++ Seq(
-    scalaVersion := "2.11.6",
+  val mylord = CrossProject("my-lord", file(""), CrossType.Full)
+    .settings(
+      scalaVersion := "2.11.7"
+    )
+
+  val mylordJs = mylord.js.in(file("mylord-js")).settings(
+    resolvers ++= Seq(
+      "amateras-repo" at "http://amateras.sourceforge.jp/mvn-snapshot/"
+    ),
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % Version.scalaJsDom,
+      "com.lihaoyi" %%% "autowire"      % Version.autowire,
+      "com.github.japgolly.scalajs-react" %%% "ext-scalaz71"  % Version.scalaJsReact,
+      "com.scalawarrior" %%% "scalajs-ace" % Version.ace
+    ),
+    emitSourceMaps := false,
+    persistLauncher := true,
+    jsDependencies += "org.webjars" % "react" % "0.12.2" / "react-with-addons.js" commonJSName "React" minified "react-with-addons.min.js",
+
+    artifactPath in (Compile, fastOptJS) :=
+      ((crossTarget in (Compile, fastOptJS)).value / ((moduleName in fastOptJS).value + "-opt.js"))
+  )
+
+  val mylordJvm = mylord.jvm.in(file("mylord-jvm")).settings(
+    scalapropsSettings,
     resolvers ++= Seq(
       Opts.resolver.sonatypeReleases,
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
       "tpolecat" at "http://dl.bintray.com/tpolecat/maven"
     ),
+    mainClass := Some("mylord.MyLordApp"),
     libraryDependencies ++= Seq(
       http4sCore,
       http4sDSL,
@@ -28,12 +52,6 @@ object MyLordBuild extends Build {
       scalatest % "test"
     ),
     scalapropsVersion := Version.scalaprops
-  )
-
-  lazy val myLord = Project(
-    id = "my-lord-server",
-    base = file("server"),
-    settings = buildSettings
   ).enablePlugins(JavaAppPackaging)
 
   object Dependencies {
@@ -44,7 +62,11 @@ object MyLordBuild extends Build {
       val doobie = "0.2.2"
       val config = "1.3.0"
       val logbackClassic = "1.1.2"
-      val scalaprops = "0.1.10"
+      val scalaprops = "0.1.11"
+      val scalaJsDom = "0.8.1"
+      val autowire = "0.2.5"
+      val scalaJsReact ="0.9.1"
+      val ace = "0.0.1-SNAPSHOT"
     }
 
     val http4sCore  = "org.http4s" %% "http4s-core"    % Version.http4s

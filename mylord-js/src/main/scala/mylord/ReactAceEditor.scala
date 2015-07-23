@@ -45,19 +45,24 @@ class Backend($: BackendScope[_, ReactAceEditor]) {
 
 case class ReactAceEditor(
   showPrintMargin: js.UndefOr[Boolean]= true,
-  name: String,
-  readOnly: js.UndefOr[Boolean]= false,
-  showGutter: js.UndefOr[Boolean]= true,
-  highlightActiveLine: js.UndefOr[Boolean]= true,
+  name: String = "editor",
+  height: js.UndefOr[Int] = 400,
+  width: js.UndefOr[Int] = 600,
+  readOnly: js.UndefOr[Boolean] = false,
+  showGutter: js.UndefOr[Boolean] = true,
+  highlightActiveLine: js.UndefOr[Boolean] = true,
   fontSize: js.UndefOr[String] = "12",
   mode: js.UndefOr[String] = js.undefined,
   theme: js.UndefOr[String] = js.undefined,
   value: js.UndefOr[String] = "") {
 
   def component = ReactComponentB[ReactAceEditor]("Ace Editor")
-    .initialState(this)
+    .initialState(ReactAceEditor())
     .backend(new Backend(_))
-    .render($ => <.div(^.id := $.state.name))
+    .render($ => <.div(
+      ^.id := $.state.name,
+      ^.width := $.state.width,
+      ^.height := $.state.height))
     .componentDidMount(_.backend.start())
     .componentWillReceiveProps(($, n) => $.backend.next(n))
     .build(this)

@@ -26,6 +26,7 @@ object MyLordBuild extends Build {
     emitSourceMaps := false,
     persistLauncher := true,
     jsDependencies ++= Seq(
+      RuntimeDOM,
       "org.webjars" % "react" % "0.12.2" / "react-with-addons.js" commonJSName "React" minified "react-with-addons.min.js",
       "org.webjars" % "ace" % "01.08.2014" / "src-noconflict/ace.js",
       "org.webjars" % "ace" % "01.08.2014" / "src-noconflict/theme-github.js" dependsOn "src-noconflict/ace.js",

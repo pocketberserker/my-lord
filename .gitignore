@@ -69,3 +69,8 @@ crashlytics.properties
 crashlytics-build.properties
 
 .DS_Store
+
+# build files
+my-lord-jsdeps.js
+my-lord-opt.js
+my-lord-launcher.js

@@ -13,7 +13,7 @@ object MyLordBuild extends Build {
       scalaVersion := "2.11.7"
     )
 
-  val mylordJs = mylord.js.in(file("mylord-js")).settings(
+  lazy val mylordJs = mylord.js.in(file("mylord-js")).settings(
     resolvers ++= Seq(
       "amateras-repo" at "http://amateras.sourceforge.jp/mvn-snapshot/"
     ),
@@ -32,10 +32,14 @@ object MyLordBuild extends Build {
       "org.webjars" % "ace" % "01.08.2014" / "src-noconflict/mode-scala.js" dependsOn "src-noconflict/ace.js"
     ),
     artifactPath in (Compile, fastOptJS) :=
-      ((crossTarget in (Compile, fastOptJS)).value / ((moduleName in fastOptJS).value + "-opt.js"))
+      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/" + (moduleName in fastOptJS).value + "-opt.js")),
+    artifactPath in (Compile, packageScalaJSLauncher) :=
+      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/" + (moduleName in fastOptJS).value + "-launcher.js")),
+    artifactPath in (Compile, packageJSDependencies) :=
+      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/" + (moduleName in fastOptJS).value + "-jsdeps.js"))
   )
 
-  val mylordJvm = mylord.jvm.in(file("mylord-jvm")).settings(
+  lazy val mylordJvm = mylord.jvm.in(file("mylord-jvm")).settings(
     scalapropsSettings,
     resolvers ++= Seq(
       Opts.resolver.sonatypeReleases,

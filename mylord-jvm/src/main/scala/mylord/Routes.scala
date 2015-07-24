@@ -6,7 +6,7 @@ import scalaz.concurrent.Task
 import scalaz.concurrent.Task._
 import org.http4s._
 import org.http4s.dsl._
-import org.http4s.server.HttpService
+import org.http4s.server._
 import org.http4s.argonaut._
 import org.log4s.getLogger
 import services._
@@ -34,7 +34,12 @@ class Routes {
           InternalServerError(e)
         }, res => Ok(res)(jsonEncoderOf[T])))
 
-  def service = HttpService {
+  def service: HttpService = Router(
+    "api" -> apiService,
+    "" -> rootService
+  )
+
+  def apiService = HttpService {
     case GET -> Root / "list.json" =>
       response[List[Compiler]](new WandboxClient().list)
     case req @ POST -> Root / "compile.json" =>
@@ -44,6 +49,14 @@ class Routes {
       } yield res)
     case GET -> "permlink" /: link =>
       response[PermanentLink](new WandboxClient().permlink(link))
-    case _ => NotFound()
+  }
+
+  def rootService = HttpService {
+    case req @ GET -> Root =>
+      StaticFile.fromResource("/staticviews/index.html", Some(req))
+        .map(Task.now _)
+        .getOrElse(NotFound())
+    case req if req.pathInfo.startsWith("/static") =>
+      StaticFile.fromResource(req.pathInfo, Some(req)).fold(NotFound())(Task.now _)
   }
 }

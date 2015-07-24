@@ -32,11 +32,11 @@ object MyLordBuild extends Build {
       "org.webjars" % "ace" % "01.08.2014" / "src-noconflict/mode-scala.js" dependsOn "src-noconflict/ace.js"
     ),
     artifactPath in (Compile, fastOptJS) :=
-      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/" + (moduleName in fastOptJS).value + "-opt.js")),
+      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/js/" + (moduleName in fastOptJS).value + "-opt.js")),
     artifactPath in (Compile, packageScalaJSLauncher) :=
-      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/" + (moduleName in fastOptJS).value + "-launcher.js")),
+      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/js/" + (moduleName in fastOptJS).value + "-launcher.js")),
     artifactPath in (Compile, packageJSDependencies) :=
-      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/" + (moduleName in fastOptJS).value + "-jsdeps.js"))
+      ((baseDirectory in mylordJvm).value / ("src/main/resources/static/js/" + (moduleName in fastOptJS).value + "-jsdeps.js"))
   )
 
   lazy val mylordJvm = mylord.jvm.in(file("mylord-jvm")).settings(

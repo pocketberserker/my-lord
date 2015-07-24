@@ -1,5 +1,7 @@
 # まい・ろーど！（仮）
 
+[![Build Status](https://travis-ci.org/pocketberserker/my-lord.svg?branch=master)](https://travis-ci.org/pocketberserker/my-lord)
+
 クイズ式プログラミング養成乙女ゲーム(なんのこっちゃ)
 
 ## 使っている技術とか
